@@ -1,0 +1,200 @@
+import datetime
+import requests
+import json
+
+def get_market_data():
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+    # 可在此串接實際 API 或爬蟲邏輯，此處提供標準資料結構
+    return {
+        "date": today_str,
+        "tw_cpi": "2.54%",
+        "tw_rate": "2.00%",
+        "us_cpi": "3.40%",
+        "us_rate": "3.50% - 3.75%",
+        "usd_twd": "31.82",
+        "us10y": "4.70%",
+        "brent": "$91.81",
+        "iron_ore": "$99.0",
+        "copper": "$14,344"
+    }
+
+def generate_html(data):
+    # 讀取模板並替換動態數值，生成完整的 index.html
+    html_template = f"""<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital_Brain_Core | 每日市場總經與政經決策平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {{ darkMode: 'class' }}
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@500;600&display=swap');
+        body {{ font-family: 'Inter', 'Noto Sans TC', system-ui, sans-serif; background-color: #090d16; }}
+        .mono {{ font-family: 'JetBrains Mono', monospace; }}
+        .glass-panel {{ background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(55, 65, 81, 0.6); }}
+        .tab-btn.active {{ background: rgba(6, 182, 212, 0.15); border-color: #06b6d4; color: #06b6d4; box-shadow: 0 0 15px rgba(6, 182, 212, 0.2); }}
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
+    <header class="border-b border-slate-800 bg-slate-900/95 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-emerald-400 flex items-center justify-center text-gray-950 font-bold">
+                    ⚡
+                </div>
+                <div>
+                    <h1 class="text-base font-bold text-white">Digital_Brain_Core 決策平台</h1>
+                    <p class="text-[11px] text-slate-400">每日市場總經與政經決策系統 · 自動排程版</p>
+                </div>
+            </div>
+            <div class="px-3 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs text-slate-200">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block mr-1.5 animate-pulse"></span>
+                <span>更新日期：{data['date']}</span>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 pt-2 border-t border-slate-800/60">
+            <nav class="flex space-x-2 pb-2 overflow-x-auto">
+                <button onclick="selectTab('summary')" id="tab-btn-summary" class="tab-btn active px-4 py-2 rounded-lg text-xs font-semibold border border-slate-800 bg-slate-900 text-slate-300">💡 本日核心洞見</button>
+                <button onclick="selectTab('macro')" id="tab-btn-macro" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold border border-slate-800 bg-slate-900 text-slate-300">📊 全球總經看板</button>
+                <button onclick="selectTab('domestic')" id="tab-btn-domestic" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold border border-slate-800 bg-slate-900 text-slate-300">🇹🇼 國內產業焦點</button>
+                <button onclick="selectTab('global')" id="tab-btn-global" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold border border-slate-800 bg-slate-900 text-slate-300">🌐 國際重大政經</button>
+                <button onclick="selectTab('calendar')" id="tab-btn-calendar" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold border border-slate-800 bg-slate-900 text-slate-300">🗓️ 前瞻行事曆</button>
+                <button onclick="selectTab('risk')" id="tab-btn-risk" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold border border-slate-800 bg-slate-900 text-slate-300">⚠️ 風險矩陣</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-grow">
+        <!-- 核心洞見 -->
+        <div id="pane-summary" class="tab-pane space-y-4">
+            <div class="glass-panel p-6 rounded-2xl border-l-4 border-l-cyan-400">
+                <div class="text-xs font-bold text-cyan-400 uppercase mb-1">Executive Summary · {data['date']}</div>
+                <h2 class="text-lg font-bold text-white mb-2">美台通膨降溫路徑確立，AI 算力基建擴張推動半導體產值邁向 1.6 兆美元</h2>
+                <p class="text-xs text-slate-300 leading-relaxed">美台通膨受控降溫，利差維持平穩，新台幣於 {data['usd_twd']} 展現抗震韌性；半導體產值加速擴張，能源能耗與先進封裝仍為主要擴展瓶頸。</p>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="glass-panel p-4 rounded-xl text-center"><div class="text-xs text-slate-400">台灣 CPI</div><div class="text-xl font-bold text-cyan-400 mono mt-1">{data['tw_cpi']}</div></div>
+                <div class="glass-panel p-4 rounded-xl text-center"><div class="text-xs text-slate-400">美國 CPI</div><div class="text-xl font-bold text-indigo-400 mono mt-1">{data['us_cpi']}</div></div>
+                <div class="glass-panel p-4 rounded-xl text-center"><div class="text-xs text-slate-400">USD/TWD</div><div class="text-xl font-bold text-emerald-400 mono mt-1">{data['usd_twd']}</div></div>
+                <div class="glass-panel p-4 rounded-xl text-center"><div class="text-xs text-slate-400">布蘭特原油</div><div class="text-xl font-bold text-amber-400 mono mt-1">{data['brent']}</div></div>
+            </div>
+        </div>
+
+        <!-- 總經看板 -->
+        <div id="pane-macro" class="tab-pane hidden space-y-4">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs bg-slate-900/60 rounded-xl overflow-hidden border border-slate-800">
+                    <thead class="bg-slate-800 text-slate-300">
+                        <tr><th class="p-3">項目</th><th class="p-3 text-center">最新數值</th><th class="p-3">趨勢與解讀</th></tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800 text-slate-200">
+                        <tr><td class="p-3 font-bold">台灣 CPI 年增率 (YoY)</td><td class="p-3 text-center font-bold text-cyan-400 mono">{data['tw_cpi']}</td><td class="p-3">通膨連續五個月後首度回落</td></tr>
+                        <tr><td class="p-3 font-bold">台灣央行重貼現率</td><td class="p-3 text-center font-bold text-cyan-400 mono">{data['tw_rate']}</td><td class="p-3">連九季維持政策利率不變</td></tr>
+                        <tr><td class="p-3 font-bold">美國 CPI 年增率 (YoY)</td><td class="p-3 text-center font-bold text-indigo-400 mono">{data['us_cpi']}</td><td class="p-3">核心通膨降至 2.50%，確立降溫趨勢</td></tr>
+                        <tr><td class="p-3 font-bold">美國聯準會基準利率</td><td class="p-3 text-center font-bold text-indigo-400 mono">{data['us_rate']}</td><td class="p-3">政策利率高原期，9 月預期維持按兵不動</td></tr>
+                        <tr><td class="p-3 font-bold">美元兌新台幣</td><td class="p-3 text-center font-bold text-emerald-400 mono">{data['usd_twd']}</td><td class="p-3">出口結匯支撐匯市流動性</td></tr>
+                        <tr><td class="p-3 font-bold">美國 10 年期公債殖利率</td><td class="p-3 text-center font-bold text-white mono">{data['us10y']}</td><td class="p-3">長天期資金成本仍處高檔</td></tr>
+                        <tr><td class="p-3 font-bold">國際鐵礦砂 (62% CFR)</td><td class="p-3 text-center font-bold text-white mono">{data['iron_ore']} / 噸</td><td class="p-3">港口庫存高達 1.66 億噸，區間盤整</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 國內焦點 -->
+        <div id="pane-domestic" class="tab-pane hidden space-y-4 text-xs">
+            <div class="glass-panel p-5 rounded-2xl space-y-2">
+                <div class="text-cyan-400 font-bold text-sm">台積電 A16 埃米製程完成驗證，背側供電就緒</div>
+                <p class="text-slate-300 leading-relaxed">運算效能升 10%、功耗降 15-20%，預計 Q4 進入量產準備；帶動台灣高階封測、特化材料與散熱液冷供應鏈。</p>
+            </div>
+            <div class="glass-panel p-5 rounded-2xl space-y-2">
+                <div class="text-indigo-400 font-bold text-sm">中國鋼廠產能受控，亞洲鋼市處於供需築底期</div>
+                <p class="text-slate-300 leading-relaxed">鐵礦砂港口庫存處高檔，原料成本壓力減緩；產品組合宜加速轉向 AI 伺服器機櫃、綠能鋼材及高強度車用鋼。</p>
+            </div>
+        </div>
+
+        <!-- 國際大事 -->
+        <div id="pane-global" class="tab-pane hidden space-y-4 text-xs">
+            <div class="glass-panel p-5 rounded-2xl space-y-2">
+                <div class="text-cyan-400 font-bold text-sm">全球半導體產值上修至 1.6 兆美元，AI 算力融資平台成形</div>
+                <p class="text-slate-300 leading-relaxed">Gartner 調升 2026 全球營收；NVIDIA 與黑石等機構建立 5,000 億美元算力融資平台，算力競賽擴展至跨國電力與資料中心基建。</p>
+            </div>
+            <div class="glass-panel p-5 rounded-2xl space-y-2">
+                <div class="text-amber-400 font-bold text-sm">美對伊新制裁推進，國際油價高檔震盪</div>
+                <p class="text-slate-300 leading-relaxed">美對伊朗能源實施新制裁，市場關注荷姆茲海峽航運風險，布蘭特原油維持在 91-93 美元區間。</p>
+            </div>
+        </div>
+
+        <!-- 行事曆 -->
+        <div id="pane-calendar" class="tab-pane hidden space-y-4 text-xs">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="glass-panel p-4 rounded-xl space-y-2">
+                    <div class="text-cyan-400 font-bold">未來 7 日關鍵日程</div>
+                    <ul class="space-y-1 text-slate-300 list-disc list-inside">
+                        <li>08/27：台灣 7 月景氣對策信號發布</li>
+                        <li>08/27-29：Jackson Hole 全球央行政策年會</li>
+                        <li>08/28：美國 7 月核心 PCE 物價指數</li>
+                    </ul>
+                </div>
+                <div class="glass-panel p-4 rounded-xl space-y-2">
+                    <div class="text-indigo-400 font-bold">未來 1 個月內 (2026 年 9 月)</div>
+                    <ul class="space-y-1 text-slate-300 list-disc list-inside">
+                        <li>09/02-04：SEMICON Taiwan 2026 國際半導體展</li>
+                        <li>09/15-16：美國聯準會 FOMC 利率會議 (發布點陣圖)</li>
+                        <li>09/17：台灣央行 Q3 理監事聯席會議</li>
+                        <li>09 月中旬：中鋼 10 月/Q4 內銷盤價會議</li>
+                    </ul>
+                </div>
+                <div class="glass-panel p-4 rounded-xl space-y-2">
+                    <div class="text-emerald-400 font-bold">未來 1 季內 (2026 年 Q4)</div>
+                    <ul class="space-y-1 text-slate-300 list-disc list-inside">
+                        <li>10 月中旬：台積電 Q3 實體法說會</li>
+                        <li>10-11 月：美股科技七雄 Q3 超級財報季</li>
+                        <li>12/08-09：FOMC 年終利率會議 (公布 2027 預測)</li>
+                    </ul>
+                </div>
+                <div class="glass-panel p-4 rounded-xl space-y-2">
+                    <div class="text-purple-400 font-bold">未來半年度 (2026 Q4 ~ 2027 Q1)</div>
+                    <ul class="space-y-1 text-slate-300 list-disc list-inside">
+                        <li>歐盟 CBAM 碳關稅正式付費申報落地</li>
+                        <li>次世代 AI 伺服器 (Vera Rubin) 量產放量</li>
+                        <li>2027 年 1-2 月春節拉貨與年後開工補庫存</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 風險矩陣 -->
+        <div id="pane-risk" class="tab-pane hidden space-y-4 text-xs">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="glass-panel p-4 rounded-xl space-y-1.5"><div class="font-bold text-red-400">貿易保護關稅</div><p class="text-slate-300">關注 CBAM 與反傾銷稅，提早完成碳足跡盤查與綠鋼認證。</p></div>
+                <div class="glass-panel p-4 rounded-xl space-y-1.5"><div class="font-bold text-amber-400">殖利率高檔震盪</div><p class="text-slate-300">10 年期美債達 4.70%，持續壓抑高估值資產與資本支出。</p></div>
+                <div class="glass-panel p-4 rounded-xl space-y-1.5"><div class="font-bold text-cyan-400">地緣能源溢價</div><p class="text-slate-300">油價高檔推升海運保費與裂解成本，需備妥安全庫存。</p></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-800 bg-slate-900/40 py-3 text-center text-[11px] text-slate-400">
+        Digital_Brain_Core · 自動更新平台
+    </footer>
+
+    <script>
+        function selectTab(tabKey) {{
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('pane-' + tabKey).classList.remove('hidden');
+            document.getElementById('tab-btn-' + tabKey).classList.add('active');
+        }}
+    </script>
+</body>
+</html>
+"""
+    with open("index.html", "w", encoding="utf-8") as f:
+        f.write(html_template)
+    print("✅ index.html 已成功自動生成！")
+
+if __name__ == "__main__":
+    data = get_market_data()
+    generate_html(data)
