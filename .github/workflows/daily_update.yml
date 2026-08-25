@@ -1,0 +1,38 @@
+name: 每日自動更新市場速報
+
+on:
+  schedule:
+    # 每日 08:00 (GMT+8)，對應 UTC 時間 00:00
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 支援在 GitHub 介面上手動一鍵觸發測試
+
+permissions:
+  contents: write
+
+jobs:
+  update-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 檢出程式碼庫
+        uses: actions/checkout@v4
+
+      - name: 設定 Python 環境
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安裝所需套件
+        run: |
+          pip install requests beautifulsoup4
+
+      - name: 執行資料擷取與網頁生成
+        run: |
+          python update_dashboard.py
+
+      - name: 自動 Commit 並 Push 最新網頁
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Auto: Update daily dashboard $(date +'%Y-%m-%d %H:%M')" || echo "無資料異動"
+          git push
