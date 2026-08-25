@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital_Brain_Core | 每日市場總經與政經決策平台</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#090d16',
+                        darkCard: '#111827',
+                        darkBorder: '#1f2937',
+                        accentCyan: '#06b6d4',
+                        accentEmerald: '#10b981',
+                        accentIndigo: '#6366f1',
+                        accentAmber: '#f59e0b',
+                        accentRed: '#ef4444'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@500;600&display=swap');
+        body {
+            font-family: 'Inter', 'Noto Sans TC', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #090d16;
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(55, 65, 81, 0.6);
+        }
+        .tab-btn {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tab-btn.active {
+            background: rgba(6, 182, 212, 0.15);
+            border-color: #06b6d4;
+            color: #06b6d4;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+        }
+        .tab-pane {
+            animation: fadeIn 0.25s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen antialiased flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
+
+    <!-- Top Platform Header -->
+    <header class="border-b border-darkBorder/80 bg-darkCard/95 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/20 text-gray-950">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-base font-bold text-white tracking-tight">Digital_Brain_Core</h1>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800 font-semibold">Web Platform v2.0</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400">每日市場總經與政經決策系統 · 經理人多維度分頁平台</p>
+                </div>
+            </div>
+
+            <!-- Status Indicator & Live Date -->
+            <div class="flex items-center space-x-2.5 text-xs">
+                <div class="flex items-center space-x-2 px-3 py-1 rounded-lg bg-slate-800/80 border border-slate-700/80 text-slate-200">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="font-medium">基準日期：2026-08-25</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Web Platform Tab Navigation Bar -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-800/60 pt-2">
+            <nav class="flex space-x-1.5 overflow-x-auto pb-2 scrollbar-none" id="main-tabs" role="tablist">
+                <button onclick="selectTab('summary')" id="tab-btn-summary" class="tab-btn active px-4 py-2 rounded-lg text-xs font-semibold border border-slate-800 bg-slate-900/60 text-slate-300 hover:text-white flex items-center gap-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    <span>本日核心洞見</span>
+                </button>
+                <button onclick="selectTab('macro')" id="tab-btn-macro" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold border border-slate-800 bg-slate-900/60 text-slate-300 hover:text-white flex items-center gap-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    <span>全球總經看板</span>
+                </button>
+                <button onclick="selectTab('domestic')" id="tab-btn-domestic" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold border border-slate-800 bg-slate-900/60 text-slate-300 hover:text-white flex items-center gap-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    <span>國內產業焦點</span>
+                </button>
+                <button onclick="selectTab('global')" id="tab-btn-global" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold border border-slate-800 bg-slate-900/60 text-slate-300 hover:text-white flex items-center gap-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>國際重大政經</span>
+                </button>
+                <button onclick="selectTab('calendar')" id="tab-btn-calendar" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold border border-slate-800 bg-slate-900/60 text-slate-300 hover:text-white flex items-center gap-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span>國內外前瞻行事曆 (4維度)</span>
+                </button>
+                <button onclick="selectTab('risk')" id="tab-btn-risk" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold border border-slate-800 bg-slate-900/60 text-slate-300 hover:text-white flex items-center gap-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span>風險矩陣與決策</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-grow">
+        
+        <!-- Tab Content 1: 本日核心洞見 -->
+        <div id="pane-summary" class="tab-pane space-y-6">
+            <div class="glass-panel p-6 rounded-2xl border-l-4 border-l-cyan-400 relative overflow-hidden">
+                <div class="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                    <span>Executive Strategy Briefing</span>
+                </div>
+                <h2 class="text-lg font-bold text-white mb-3 leading-snug">美台通膨降溫路徑確立，AI 算力基建擴張推動半導體產值邁向 1.6 兆美元</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-3 border-t border-slate-800/80 text-xs text-slate-300">
+                    <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
+                        <div class="text-cyan-400 font-bold mb-1">1. 通膨與利率走勢</div>
+                        <p class="leading-relaxed">美台通膨受控降溫（台灣 2.54%、美國 3.40%），利差維持 1.50%~1.75%，新台幣於 31.82 展現抗震韌性。</p>
+                    </div>
+                    <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
+                        <div class="text-emerald-400 font-bold mb-1">2. 先進算力與製造</div>
+                        <p class="leading-relaxed">台積電 A16 埃米製程完成驗證，全球半導體產值朝 1.6 兆美元邁進，AI 基礎設施能耗與先進封裝仍為主要瓶頸。</p>
+                    </div>
+                    <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
+                        <div class="text-indigo-400 font-bold mb-1">3. 關鍵時點與風險</div>
+                        <p class="leading-relaxed">未來一月聚焦 SEMICON Taiwan 與美台 9 月利率決策；中長線關注歐盟 CBAM 碳關稅落地與原油地緣溢價。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 核心指標數據速覽 -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="glass-panel p-4 rounded-xl text-center">
+                    <div class="text-xs text-slate-400">台灣 CPI 年增率</div>
+                    <div class="text-xl font-bold text-cyan-400 mono mt-1">2.54%</div>
+                    <div class="text-[11px] text-emerald-400 mt-0.5">通膨壓力回落</div>
+                </div>
+                <div class="glass-panel p-4 rounded-xl text-center">
+                    <div class="text-xs text-slate-400">美國 CPI 年增率</div>
+                    <div class="text-xl font-bold text-indigo-400 mono mt-1">3.40%</div>
+                    <div class="text-[11px] text-emerald-400 mt-0.5">核心降至 2.50%</div>
+                </div>
+                <div class="glass-panel p-4 rounded-xl text-center">
+                    <div class="text-xs text-slate-400">美元兌新台幣</div>
+                    <div class="text-xl font-bold text-emerald-400 mono mt-1">31.82</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">區間抗震整理</div>
+                </div>
+                <div class="glass-panel p-4 rounded-xl text-center">
+                    <div class="text-xs text-slate-400">布蘭特原油 (Brent)</div>
+                    <div class="text-xl font-bold text-amber-400 mono mt-1">$91.81</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">地緣溢價支撐</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content 2: 全球總經看板 -->
+        <div id="pane-macro" class="tab-pane hidden space-y-6">
+            <div class="space-y-3">
+                <div class="flex items-center space-x-2">
+                    <span class="w-2 h-4 bg-cyan-400 rounded-full"></span>
+                    <h2 class="text-sm font-bold text-white">一、 核心總經指標 (Macroeconomic Fundamentals)</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse bg-slate-900/60 rounded-xl overflow-hidden border border-slate-800">
+                        <thead class="bg-slate-800/80 text-slate-300">
+                            <tr>
+                                <th class="p-3 font-semibold">地區 / 項目</th>
+                                <th class="p-3 font-semibold text-center">最新指標值</th>
+                                <th class="p-3 font-semibold text-center">前期值</th>
+                                <th class="p-3 font-semibold text-center">市場預期</th>
+                                <th class="p-3 font-semibold">政策目標 / 景氣象限</th>
+                                <th class="p-3 font-semibold">趨勢與訊號解讀</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/80 text-slate-200">
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-3 font-bold text-white">台灣 CPI 年增率 (YoY)</td>
+                                <td class="p-3 text-center font-bold text-cyan-400 mono">2.54%</td>
+                                <td class="p-3 text-center mono text-slate-400">2.60%</td>
+                                <td class="p-3 text-center mono text-slate-400">2.40%</td>
+                                <td class="p-3">2.00% 警戒線</td>
+                                <td class="p-3 text-slate-300">通膨連續五個月後首度回落（主計總處）</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-3 font-bold text-white">台灣央行重貼現率</td>
+                                <td class="p-3 text-center font-bold text-cyan-400 mono">2.00%</td>
+                                <td class="p-3 text-center mono text-slate-400">2.00%</td>
+                                <td class="p-3 text-center mono text-slate-400">2.00%</td>
+                                <td class="p-3">中性偏緊</td>
+                                <td class="p-3 text-slate-300">連九季維持利率不變（中央銀行）</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-3 font-bold text-white">美國 CPI 年增率 (YoY)</td>
+                                <td class="p-3 text-center font-bold text-indigo-400 mono">3.40%</td>
+                                <td class="p-3 text-center mono text-slate-400">3.50%</td>
+                                <td class="p-3 text-center mono text-slate-400">3.40%</td>
+                                <td class="p-3">2.00% Fed 目標</td>
+                                <td class="p-3 text-slate-300">核心通膨降至 2.50%，降溫趨勢確立（BLS）</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-3 font-bold text-white">美國聯準會基準利率</td>
+                                <td class="p-3 text-center font-bold text-indigo-400 mono">3.50% - 3.75%</td>
+                                <td class="p-3 text-center mono text-slate-400">3.50% - 3.75%</td>
+                                <td class="p-3 text-center mono text-slate-400">3.50% - 3.75%</td>
+                                <td class="p-3">政策利率高原期</td>
+                                <td class="p-3 text-slate-300">9 月 FOMC 維持按兵不動機率高（Fed FOMC）</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-3 font-bold text-white">美元指數 (DXY)</td>
+                                <td class="p-3 text-center font-bold text-emerald-400 mono">98.98</td>
+                                <td class="p-3 text-center mono text-slate-400">99.00</td>
+                                <td class="p-3 text-center mono text-slate-400">-</td>
+                                <td class="p-3">區間偏弱</td>
+                                <td class="p-3 text-slate-300">殖利率回落引導美元微幅走貶</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <div class="flex items-center space-x-2">
+                    <span class="w-2 h-4 bg-emerald-400 rounded-full"></span>
+                    <h2 class="text-sm font-bold text-white">二、 股匯債與大宗原物料行情 (Markets at a Glance)</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse bg-slate-900/60 rounded-xl overflow-hidden border border-slate-800">
+                        <thead class="bg-slate-800/80 text-slate-300">
+                            <tr>
+                                <th class="p-3 font-semibold">資產類別</th>
+                                <th class="p-3 font-semibold">關鍵標的</th>
+                                <th class="p-3 font-semibold text-center">最新報價</th>
+                                <th class="p-3 font-semibold text-center">日漲跌 / 變化</th>
+                                <th class="p-3 font-semibold">走勢型態</th>
+                                <th class="p-3 font-semibold">經理人解讀</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/80 text-slate-200">
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-3 font-bold text-cyan-400">匯率 (FX)</td>
+                                <td class="p-3 font-semibold text-white">USD / TWD</td>
+                                <td class="p-3 text-center font-bold text-emerald-400 mono">31.82</td>
+                                <td class="p-3 text-center mono text-slate-300">-0.04 TWD</td>
+                                <td class="p-3">區間震盪</td>
+                                <td class="p-3 text-slate-300">美台利差維持 1.50%~1.75%，出口商結匯提供支撐</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-3 font-bold text-indigo-400">債券 (Bonds)</td>
+                                <td class="p-3 font-semibold text-white">美國 10 年期公債殖利率</td>
+                                <td class="p-3 text-center font-bold text-white mono">4.70%</td>
+                                <td class="p-3 text-center mono text-emerald-400">-4 bps</td>
+                                <td class="p-3">高檔整固</td>
+                                <td class="p-3 text-slate-300">財政部回購政策提振債市，長天期借貸成本仍處相對高位</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-3 font-bold text-amber-400">股市 (Equities)</td>
+                                <td class="p-3 font-semibold text-white">台灣加權指數 (TAIEX)<br>標普 500 指數 (S&P 500)</td>
+                                <td class="p-3 text-center font-bold text-white mono">44,770 點<br>7,652.86 點</td>
+                                <td class="p-3 text-center mono text-red-400">-1.00%<br>-0.30%</td>
+                                <td class="p-3">高檔調節<br>觀望整理</td>
+                                <td class="p-3 text-slate-300">外資持股高檔震盪，等待科技巨頭財報與年會指引</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-3 font-bold text-red-400">能源 (Energy)</td>
+                                <td class="p-3 font-semibold text-white">布蘭特原油 (Brent Crude)</td>
+                                <td class="p-3 text-center font-bold text-amber-400 mono">$91.81 / 桶</td>
+                                <td class="p-3 text-center mono text-slate-300">-0.39%</td>
+                                <td class="p-3">地緣溢價</td>
+                                <td class="p-3 text-slate-300">美對伊新制裁與中東局勢支撐油價維持 90 美元上方</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-3 font-bold text-emerald-400">金屬 (Metals)</td>
+                                <td class="p-3 font-semibold text-white">國際鐵礦砂 (62% CFR)<br>LME 國際銅價 (Cash)</td>
+                                <td class="p-3 text-center font-bold text-white mono">$99.0 / 噸<br>$14,344 / 噸</td>
+                                <td class="p-3 text-center mono text-slate-300">區間偏弱<br>+0.37%</td>
+                                <td class="p-3">築底盤整<br>強勢抗跌</td>
+                                <td class="p-3 text-slate-300">鐵礦砂港口庫存達 1.66 億噸；銅受電網基建需求支撐</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content 3: 國內產業焦點 -->
+        <div id="pane-domestic" class="tab-pane hidden space-y-4">
+            <div class="glass-panel p-5 rounded-2xl space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-cyan-400">半導體先進製程</span>
+                    <span class="text-[11px] text-slate-400">2026 Q4 量產準備</span>
+                </div>
+                <h3 class="text-sm font-bold text-white">台積電 A16 埃米製程完成驗證，背側供電（Super Power Rail）就緒</h3>
+                <div class="space-y-2 text-xs text-slate-300 leading-relaxed">
+                    <p><strong class="text-white">事實摘要：</strong>台積電 A16 埃米世代製程完成全面驗證，導入先進背側供電網路，預計於第四季進入量產準備。</p>
+                    <p><strong class="text-white">供需與成本影響：</strong>運算速度提升 8-10%、功耗降低 15-20%，傳已獲次世代 AI 伺服器晶片架構優先預訂產能。</p>
+                    <p><strong class="text-emerald-400 font-medium">經理人決策洞見：</strong>確立先進製程技術護城河，高階運算硬體迭代加速，有助帶動台灣高階封測、特化材料與液冷散熱供應鏈拉貨。</p>
+                </div>
+                <div class="pt-3 border-t border-slate-800 text-[11px] text-slate-400">
+                    來源：<a href="https://www.ftcelectronics.com.ua/news/electronics-weekly-news-aug-17-23,2026" target="_blank" class="text-cyan-400 hover:underline">FTC Electronics Weekly</a>
+                </div>
+            </div>
+
+            <div class="glass-panel p-5 rounded-2xl space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-indigo-400">鋼鐵與原物料動態</span>
+                    <span class="text-[11px] text-slate-400">產能調控 · 結構調整</span>
+                </div>
+                <h3 class="text-sm font-bold text-white">中國鋼廠產能受控，亞洲鋼市處於供需築底期</h3>
+                <div class="space-y-2 text-xs text-slate-300 leading-relaxed">
+                    <p><strong class="text-white">事實摘要：</strong>中國主要港口鐵礦砂庫存達 1.66 億噸歷史相對高檔，BMI 預估全年鐵礦砂均價落於每噸 99 美元；中國重點鋼企粗鋼產量與出口增速放緩。</p>
+                    <p><strong class="text-white">供需與成本影響：</strong>上游原料成本壓力減緩，低價鋼材外溢衝擊邊際遞減；然建築用鋼需求偏弱，行情支撐轉向製造業與基礎設施用鋼。</p>
+                    <p><strong class="text-indigo-400 font-medium">經理人決策洞見：</strong>鋼市進入結構性調整，傳統建材鋼利潤受限，產品組合宜加速轉向 AI 伺服器機櫃用鋼、綠能鋼材及高強度車用鋼等高附加價值鋼品。</p>
+                </div>
+                <div class="pt-3 border-t border-slate-800 text-[11px] text-slate-400">
+                    來源：<a href="https://www.miningweekly.com/article/bmi-revises-iron-ore-price-forecast-downward-to-reflect-weak-global-market-activity-demand-2026-08-19" target="_blank" class="text-cyan-400 hover:underline">Mining Weekly 鋼市分析</a> · <a href="https://www.fitchratings.com/research/corporate-finance/china-leading-steelmakers-withstand-weaker-output-trade-24-08-2026" target="_blank" class="text-cyan-400 hover:underline">惠譽評級報告</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content 4: 國際重大政經 -->
+        <div id="pane-global" class="tab-pane hidden space-y-4">
+            <div class="glass-panel p-5 rounded-2xl space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-cyan-400">算力基建與資本流動</span>
+                    <span class="text-[11px] text-slate-400">資本擴張</span>
+                </div>
+                <h3 class="text-sm font-bold text-white">全球半導體產值上調至 1.6 兆美元，AI 算力融資平台成形</h3>
+                <div class="space-y-2 text-xs text-slate-300 leading-relaxed">
+                    <p><strong class="text-white">事件核心：</strong>Gartner 發布研調將 2026 年全球半導體總營收上修至 1.6 兆美元；NVIDIA 與黑石、阿波羅等機構合作推進逾 5,000 億美元算力基建融資方案。</p>
+                    <p><strong class="text-white">全球貿易鏈衝擊：</strong>算力競賽擴大為跨國電力、資料中心與硬體全產業鏈投資，帶動先進封裝（CoWoS）、伺服器電源與散熱模組訂單滿載。</p>
+                    <p><strong class="text-cyan-400 font-medium">策略評估：</strong>全球科技資本支出未見縮減，關鍵瓶頸由「晶片設計」延伸至「封裝產能」與「區域電網承載力」。</p>
+                </div>
+                <div class="pt-3 border-t border-slate-800 text-[11px] text-slate-400">
+                    來源：<a href="https://www.gartner.com/en/newsroom/press-releases/2026-08-24-gartner-forecasts-worldwide-semiconductor-revenue-to-reach-1-trillion-dollars-in-2026" target="_blank" class="text-cyan-400 hover:underline">Gartner 官方發布</a> · <a href="https://nvidianews.nvidia.com/news/nvidia-partners-with-apollo-blackrock-blackstone-brookfield-goldman-sachs-and-kkr-to-establish-ai-compute-infrastructure-financing-platforms-to-mobilize-over-500-billion-of-third-party-capital" target="_blank" class="text-cyan-400 hover:underline">NVIDIA Newsroom</a>
+                </div>
+            </div>
+
+            <div class="glass-panel p-5 rounded-2xl space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-amber-400">地緣政經與能源監測</span>
+                    <span class="text-[11px] text-slate-400">國際制裁</span>
+                </div>
+                <h3 class="text-sm font-bold text-white">美對伊新制裁推進，國際油價高檔震盪</h3>
+                <div class="space-y-2 text-xs text-slate-300 leading-relaxed">
+                    <p><strong class="text-white">事件核心：</strong>美國加碼對伊朗能源出口實施新一輪經濟制裁，市場評估中東荷姆茲海峽航運與原油供給風險，布蘭特原油維持在 91-93 美元區間。</p>
+                    <p><strong class="text-white">市場影響：</strong>推升全球航運保費與石化裂解原料成本，限制全球央行短期內大幅寬鬆之政策空間。</p>
+                </div>
+                <div class="pt-3 border-t border-slate-800 text-[11px] text-slate-400">
+                    來源：<a href="https://m.economictimes.com/markets/commodities/news/oil-price-today-august-25-crude-oil-at-92-as-investors-digest-us-economic-sanctions-on-iran-whats-next-for-investors/articleshow/133487237.cms" target="_blank" class="text-cyan-400 hover:underline">The Economic Times 原油動態</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content 5: 國內外前瞻行事曆 (4維度) -->
+        <div id="pane-calendar" class="tab-pane hidden space-y-6">
+            
+            <!-- 階段 1 -->
+            <div class="space-y-2.5">
+                <div class="flex items-center space-x-2">
+                    <span class="px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 text-[11px] font-bold border border-cyan-800">階段一</span>
+                    <h3 class="text-xs font-bold text-white">未來 7 日關鍵日程 (Immediate: 2026/08/25 ~ 08/31)</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse bg-slate-900/60 rounded-xl overflow-hidden border border-slate-800">
+                        <thead class="bg-slate-800/80 text-slate-300">
+                            <tr>
+                                <th class="p-2.5">日期</th>
+                                <th class="p-2.5">地區 / 機構</th>
+                                <th class="p-2.5">重大事件與數據</th>
+                                <th class="p-2.5">核心觀察指標</th>
+                                <th class="p-2.5">經理人決策影響</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/80 text-slate-200">
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-2.5 font-bold text-white mono">08/27 (四)</td>
+                                <td class="p-2.5 text-cyan-400">台灣 · 國發會</td>
+                                <td class="p-2.5 font-semibold text-white">7 月景氣對策信號</td>
+                                <td class="p-2.5">綜合判斷分數、燈號</td>
+                                <td class="p-2.5 text-slate-300">評估製造業外銷景氣動能是否持續擴張。</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-2.5 font-bold text-white mono">08/27 (四)</td>
+                                <td class="p-2.5 text-indigo-400">美國 · 商務部</td>
+                                <td class="p-2.5 font-semibold text-white">Q2 GDP 修正值與失業金</td>
+                                <td class="p-2.5">GDP 季增年率修正幅度</td>
+                                <td class="p-2.5 text-slate-300">驗證美國經濟是否符合「軟著陸」情境。</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-2.5 font-bold text-white mono">08/27-08/29</td>
+                                <td class="p-2.5 text-indigo-400">美國 · 聯準會</td>
+                                <td class="p-2.5 font-semibold text-white"><a href="https://www.kansascityfed.org/research/jackson-hole-economic-symposium/" target="_blank" class="text-cyan-400 hover:underline">Jackson Hole 央行政策年會</a></td>
+                                <td class="p-2.5">Fed 主席演說、中性利率</td>
+                                <td class="p-2.5 text-slate-300">全球央行定調 2026 下半年貨幣政策寬鬆基調。</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-2.5 font-bold text-white mono">08/28 (五)</td>
+                                <td class="p-2.5 text-indigo-400">美國 · BEA</td>
+                                <td class="p-2.5 font-semibold text-white">7 月核心 PCE 物價指數</td>
+                                <td class="p-2.5">PCE YoY（預期 2.5%~2.6%）</td>
+                                <td class="p-2.5 text-slate-300">聯準會最重視通膨指標，直接牽動 9 月利率定價。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 階段 2 -->
+            <div class="space-y-2.5">
+                <div class="flex items-center space-x-2">
+                    <span class="px-2 py-0.5 rounded bg-indigo-950 text-indigo-400 text-[11px] font-bold border border-indigo-800">階段二</span>
+                    <h3 class="text-xs font-bold text-white">未來 1 個月內重大事件 (Near-Term: 2026 年 9 月)</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse bg-slate-900/60 rounded-xl overflow-hidden border border-slate-800">
+                        <thead class="bg-slate-800/80 text-slate-300">
+                            <tr>
+                                <th class="p-2.5">預定日期</th>
+                                <th class="p-2.5">地區 / 機構</th>
+                                <th class="p-2.5">重大事件與產業會議</th>
+                                <th class="p-2.5">關鍵驅動因子</th>
+                                <th class="p-2.5">產業與決策關聯</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/80 text-slate-200">
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-2.5 font-bold text-white mono">09/02-09/04</td>
+                                <td class="p-2.5 text-cyan-400">台灣 · 台北</td>
+                                <td class="p-2.5 font-semibold text-white"><a href="https://www.semicontaiwan.org/zh" target="_blank" class="text-cyan-400 hover:underline">SEMICON Taiwan 2026</a></td>
+                                <td class="p-2.5">埃米製程、CoWoS/面板封裝</td>
+                                <td class="p-2.5 text-slate-300">確立次世代晶片封裝與特化材料採購規格。</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-2.5 font-bold text-white mono">09/04 (五)</td>
+                                <td class="p-2.5 text-indigo-400">美國 · 勞工部</td>
+                                <td class="p-2.5 font-semibold text-white">8 月非農就業報告 (NFP)</td>
+                                <td class="p-2.5">新增就業、失業率</td>
+                                <td class="p-2.5 text-slate-300">決定 Fed 政策天秤是否由防通膨轉向保就業。</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-2.5 font-bold text-white mono">09/08 前後</td>
+                                <td class="p-2.5 text-cyan-400">台灣 · 財政部</td>
+                                <td class="p-2.5 font-semibold text-white">8 月海關進出口貿易統計</td>
+                                <td class="p-2.5">出口年增率、資通產品外銷額</td>
+                                <td class="p-2.5 text-slate-300">檢視 AI 伺服器與電子零組件出口續航力。</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-2.5 font-bold text-white mono">09/11 (五)</td>
+                                <td class="p-2.5 text-indigo-400">美國 · BLS</td>
+                                <td class="p-2.5 font-semibold text-white">8 月消費者物價指數 (CPI)</td>
+                                <td class="p-2.5">通膨回落斜率、能源項目</td>
+                                <td class="p-2.5 text-slate-300">9 月 FOMC 會前最後一份重磅物價數據。</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-2.5 font-bold text-white mono">09/15-09/16</td>
+                                <td class="p-2.5 text-indigo-400">美國 · 聯準會</td>
+                                <td class="p-2.5 font-semibold text-white"><a href="https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm" target="_blank" class="text-cyan-400 hover:underline">FOMC 利率會議 (SEP/點陣圖)</a></td>
+                                <td class="p-2.5">基準利率決策、2026-2027 點陣圖</td>
+                                <td class="p-2.5 text-slate-300">決定全球流動性走向與美元指數強弱。</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-2.5 font-bold text-white mono">09/17 (四)</td>
+                                <td class="p-2.5 text-cyan-400">台灣 · 央行</td>
+                                <td class="p-2.5 font-semibold text-white"><a href="https://www.cbc.gov.tw/en/mp-2.html" target="_blank" class="text-cyan-400 hover:underline">Q3 理監事聯席會議</a></td>
+                                <td class="p-2.5">重貼現率（預期 2.0%）、房市管制</td>
+                                <td class="p-2.5 text-slate-300">評估房市管制成效與新台幣匯率防禦區間。</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-2.5 font-bold text-white mono">09 月中旬</td>
+                                <td class="p-2.5 text-cyan-400">台灣 · 中鋼</td>
+                                <td class="p-2.5 font-semibold text-white">10 月及 Q4 內銷鋼品盤價會議</td>
+                                <td class="p-2.5">亞洲鋼廠盤價、原料成本連動</td>
+                                <td class="p-2.5 text-slate-300">牽動第 4 季鋼鐵下游用鋼成本與季合約簽訂。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 階段 3 & 4 緊湊卡片網格 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                <div class="glass-panel p-4 rounded-xl space-y-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 text-[10px] font-bold border border-emerald-800">階段三</span>
+                        <h4 class="text-xs font-bold text-white">未來 1 季內核心節點 (2026 Q4)</h4>
+                    </div>
+                    <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+                        <li><strong>10 月中旬</strong>：台積電 Q3 實體法說會（A16 量產與資本支出）。</li>
+                        <li><strong>10-11 月</strong>：美股科技七雄 Q3 財報季（驗證 AI ROI 與算力投資）。</li>
+                        <li><strong>11/03</strong>：美國期中政經局勢與貿易政策檢視（Section 232/301）。</li>
+                        <li><strong>12/08-09</strong>：FOMC 年終利率會議（公布 2027 年利率路徑總預測）。</li>
+                        <li><strong>12/17</strong>：台灣央行 Q4 理監事會議（公布 2027 年經濟展望）。</li>
+                    </ul>
+                </div>
+
+                <div class="glass-panel p-4 rounded-xl space-y-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="px-2 py-0.5 rounded bg-purple-950 text-purple-400 text-[10px] font-bold border border-purple-800">階段四</span>
+                        <h4 class="text-xs font-bold text-white">未來半年度關鍵戰略 (2026 Q4 ~ 2027 Q1)</h4>
+                    </div>
+                    <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+                        <li><strong>歐盟 CBAM 落地與碳費徵收</strong>：2026 年底進入正式付費申報，需加速低碳鋼認證。</li>
+                        <li><strong>次世代 AI 伺服器量產潮</strong>：Vera Rubin / Grace Blackwell 伺服器出貨帶動機櫃高階用鋼。</li>
+                        <li><strong>春節備貨與補庫存週期</strong>：2027 年 1-2 月年前拉貨與開工補庫，需提早鎖定交期。</li>
+                        <li><strong>2027 達沃斯論壇與 Q1 央行決策</strong>：1 月 WEF 峰會與 3 月美台央行決策定調 2027 全局。</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Tab Content 6: 風險矩陣 -->
+        <div id="pane-risk" class="tab-pane hidden space-y-4">
+            <div class="glass-panel p-6 rounded-2xl space-y-4">
+                <div class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                    <span>Risk Governance Matrix · 經理人風險防禦矩陣</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2">
+                        <div class="font-bold text-white flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-red-400"></span>
+                            貿易保護與關稅壁壘
+                        </div>
+                        <p class="text-slate-300 leading-relaxed">
+                            各國針對低碳鋼品與科技硬體之邊境碳稅（CBAM）與反傾銷關稅動向頻仍，需提早完成產品碳足跡盤查與綠色認證。
+                        </p>
+                    </div>
+                    <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2">
+                        <div class="font-bold text-white flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                            殖利率高檔震盪風險
+                        </div>
+                        <p class="text-slate-300 leading-relaxed">
+                            若 10 年期美債殖利率維持在 4.70% 以上，將持續對長線資本支出與高本益比資產構成估值壓力，需嚴控財務槓桿。
+                        </p>
+                    </div>
+                    <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2">
+                        <div class="font-bold text-white flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                            地緣溢價與供應鏈中斷
+                        </div>
+                        <p class="text-slate-300 leading-relaxed">
+                            中東制裁與主要海運航道安全情勢可能使油價（$91+）與海運保費維持高檔，需建立關鍵原物料之安全庫存緩衝。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-darkBorder/80 bg-darkCard/40 py-3.5 text-center text-[11px] text-slate-400">
+        <p>Digital_Brain_Core · 每日市場總經與政經決策系統</p>
+    </footer>
+
+    <!-- Tab Interactive JavaScript -->
+    <script>
+        function selectTab(tabKey) {
+            // Hide all tab panes
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+            // Deactivate all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            // Show active pane
+            const targetPane = document.getElementById('pane-' + tabKey);
+            if (targetPane) targetPane.classList.remove('hidden');
+
+            // Set active button style
+            const targetBtn = document.getElementById('tab-btn-' + tabKey);
+            if (targetBtn) targetBtn.classList.add('active');
+        }
+    </script>
+</body>
+</html>
+
